@@ -1,0 +1,137 @@
+---
+title: 'Final Project - Step 2 (15 Points)'
+subtitle: "PSTAT100: Data Science Concepts and Analysis" 
+
+author:
+    affiliations:
+      - name: "Spring 2025"
+affiliation-title: "Quarter"
+format: 
+ pdf: 
+    latex_engine: xelatex
+    geometry: "letterpaper, margin=0.3in"
+    code-fold: true
+    code-line-numbers: true
+    code-copy: true
+    code-tools: true
+    self-contained: true
+    toc: false
+    toc-location: left
+    number-sections: true
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message =  FALSE)
+knitr::opts_chunk$set(warning =  FALSE)
+knitr::opts_chunk$set(error =  FALSE)
+bfcolor <- function(x, color) {
+  if (knitr::is_latex_output()) {
+    sprintf("\\textcolor{%s}{\\textbf{%s}}", color, x)
+  } else if (knitr::is_html_output()) {
+    sprintf("<span style='color: %s;'><b>%s</b></span>", color, x)
+  } else x
+}
+```
+
+
+
+:::callout
+<div style="text-align: center">
+<span style="color: blue;"> **STUDENT NAME **</span> 
+</div>
+- Xinyao Song   (6194773)
+- STUDENT 2    (NetID 2)
+- STUDENT 3    (NetID 3)
+- STUDENT 4    (NetID 4)
+- STUDENT 5    (NetID 5)
+:::
+
+
+::: {.callout-caution}
+## Due Date
+The deadline for this step is **Friday, May 9, 2025**.
+:::
+
+
+:::{.callout-tip}
+# Instructions
+In this step, you will develop clear research questions and hypotheses based on your selected dataset, and conduct a thorough Exploratory Data Analysis (EDA). This foundational work is crucial for guiding your analysis in the following steps.
+
+:::
+
+# Step 2: Research Questions, Hypotheses, and Exploratory Data Analysis (EDA)
+
+
+## Research Questions
+
+**Question 1**  
+
+- How does weekly study time, parents’ education level, and internet access influence a student’s average Portuguese grade (average of G1, G2, and G3)?
+
+**Question 2**  
+
+- How is alcohol consumption among Portuguese high school students associated with their academic performance and social activities? 
+
+**Question 3**  
+
+- Does the average free time differ between students who are in a romantic relationship and those who are not? 
+
+## Hypotheses
+
+**Hypothesis 1**  
+
+- At least one of the predictors (weekly study time, parents’ education level, or internet access) has a significant effect on students’ average Portuguese grade. 
+
+**Hypothesis 2**  
+
+- Alcohol consumption is significantly associated with either academic performance or social activity levels among Portuguese high school students. 
+
+**Hypothesis 3**  
+
+- There is a significant difference in means between students in a relationship and those who are not.
+
+## Exploratory Data Analysis (EDA)
+
+## Data Cleaning
+```{r}
+library(dplyr)
+library(tidyr)
+library(readr)
+
+# Preprocess student data frame
+por_df <- readr::read_delim("../data/student-por.csv", delim = ";")
+
+por_df <- por_df %>%
+  mutate(
+    school = as.factor(school),
+    sex = as.factor(sex),
+    address = as.factor(address),
+    famsize = as.factor(famsize),
+    Pstatus = as.factor(Pstatus),
+    Mjob = as.factor(Mjob),
+    Fjob = as.factor(Fjob),
+    reason = as.factor(reason),
+    guardian = as.factor(guardian),
+    schoolsup = as.factor(schoolsup),
+    famsup = as.factor(famsup),
+    paid = as.factor(paid),
+    activities = as.factor(activities),
+    nursery = as.factor(nursery),
+    higher = as.factor(higher),
+    internet = as.factor(internet),
+    romantic = as.factor(romantic)
+  )
+
+# Check for missing values
+print(anyNA(por_df))
+```
+From the missing value check above, we can see that there are no missing values in this dataset. Therefore, no data cleaning is necessary.
+
+## Descriptive Statistics
+```{r}
+summary(por_df)
+```
+
+
+
+## Data Visualization
+

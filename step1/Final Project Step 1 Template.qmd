@@ -1,0 +1,85 @@
+---
+title: 'Final Project - Step 1 (8 Points)'
+subtitle: "PSTAT100: Data Science Concepts and Analysis" 
+
+author:
+    affiliations:
+      - name: "Spring 2025"
+affiliation-title: "Quarter"
+format: 
+ pdf: 
+    latex_engine: xelatex
+    geometry: "letterpaper, margin=0.3in"
+    code-fold: true
+    code-line-numbers: true
+    code-copy: true
+    code-tools: true
+    self-contained: true
+    toc: false
+    toc-location: left
+    number-sections: true
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message =  FALSE)
+knitr::opts_chunk$set(warning =  FALSE)
+knitr::opts_chunk$set(error =  FALSE)
+bfcolor <- function(x, color) {
+  if (knitr::is_latex_output()) {
+    sprintf("\\textcolor{%s}{\\textbf{%s}}", color, x)
+  } else if (knitr::is_html_output()) {
+    sprintf("<span style='color: %s;'><b>%s</b></span>", color, x)
+  } else x
+}
+```
+
+:::{.callout-caution}
+# Due Date
+The deadline for this step is Friday, April 25.
+:::
+
+:::callout
+
+
+# Formation of groups:
+<div style="text-align: center">
+<span style="color: blue;"> **Monday 5pm Section Group 4**</span> 
+</div>
+- Xinyao Song     (xinyaosong)
+- Nic Chan        (nicholaschan)
+- Jay Chang       (jchang206)
+- Darren Colianni (dcolianni)
+- Matthew Chan    (hchan837)
+:::
+
+# Tentative Role Distribution Table
+
+| Name           | Responsibilities                                |
+|----------------|--------------------------------------------------|
+| Xinyao Song    | GG-plot Interweaving & Analysis                  |
+| Nic Chan       | Research / Background Information                |
+| Jay Chang      | Coding / Meeting Coordinator                     |
+| Darren Colianni| Hypothesis Tests / Prediction Modeling           |
+| Matthew Chan   | Writing the report / Research                    |
+
+# Data Information
+
+  **Data Name/Title**: Student Performance
+  
+  **Author/Owner**: Paulo Cortez
+  
+  **Date of Publication**: 11/26/2014
+  
+  **Publication Venue**: UC Irvine Machine Learning Repository 
+  
+  **Retrieval Date**: 4/22/25
+ 
+  **Link**:  https://archive.ics.uci.edu/dataset/320/student+performance
+
+  **Citation (APA)**: Cortez, P. (2008). Student Performance [Dataset]. UCI Machine Learning Repository. https://doi.org/10.24432/C5TG7T.
+
+
+# Initial Insights:
+The data consists of two Portuguese high schools and follows a trimester system for student performance: G1, G2, and G3, each scored from 0 to 20. Among the features, study time, travel time, and absences seem to be the most important. Past performance is also likely a major influence. Our team finds it particularly interesting how good study habits and learning techniques developed during high school can significantly improve for certain students from 9th to 12th grade. This dataset presents us a unique opportunity to explore how behavioral factors shape student's educational performances. 
+
+
+
