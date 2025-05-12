@@ -39,7 +39,7 @@ bfcolor <- function(x, color) {
 <span style="color: blue;"> **STUDENT NAME **</span> 
 </div>
 - Xinyao Song   (6194773)
-- STUDENT 2    (NetID 2)
+- Matthew Chan (hchan837)
 - STUDENT 3    (NetID 3)
 - STUDENT 4    (NetID 4)
 - STUDENT 5    (NetID 5)
@@ -96,6 +96,7 @@ In this step, you will develop clear research questions and hypotheses based on 
 library(dplyr)
 library(tidyr)
 library(readr)
+library(ggplot2)
 
 # Preprocess student data frame
 por_df <- readr::read_delim("../data/student-por.csv", delim = ";")
@@ -118,7 +119,9 @@ por_df <- por_df %>%
     nursery = as.factor(nursery),
     higher = as.factor(higher),
     internet = as.factor(internet),
-    romantic = as.factor(romantic)
+    romantic = as.factor(romantic),
+    Dalc = factor(Dalc, levels = 1:5, ordered = TRUE), # ordered factor from 1-5 for very high, low etc.
+    Walc = factor(Walc, levels = 1:5, ordered = TRUE)
   )
 
 # Check for missing values
@@ -134,4 +137,62 @@ summary(por_df)
 
 
 ## Data Visualization
+
+### Research Question 2: How is alcohol consumption among Portuguese high school students associated with their academic performance and social activities? 
+
+\section*{Grade Distributions by Alcohol Levels} 
+
+**Final Grade by Workday Alcohol Category:**
+```{r}
+ggplot(por_df, aes(x = Dalc, y = G3)) +
+  geom_boxplot(outlier.alpha = 0.4, fill = "lightcoral") +
+  labs(
+    title = "Distribution of Final Grades Across Workday Alcohol Levels",
+    x = "Workday Alcohol Level",
+    y = "Final Grade (G3)"
+  ) +
+  theme_minimal()
+```
+
+**Final Grade by Weekend Alcohol Category:**
+```{r}
+ggplot(por_df, aes(x = Walc, y = G3)) +
+  geom_boxplot(outlier.alpha = 0.4, fill = "steelblue") +
+  labs(
+    title = "Distribution of Final Grades Across Weekend Alcohol Levels",
+    x = "Weekend Alcohol Level",
+    y = "Final Grade (G3)"
+  ) +
+  theme_minimal()
+```
+---
+
+\section*{Social Activities vs Alcohol Consumption} 
+
+**Going Out Frequency by Workday Alcohol:**
+```{r}
+ggplot(por_df, aes(x = Dalc, y = goout)) +
+  geom_boxplot(outlier.alpha = 0.4, fill = "lightcoral") +
+  labs(
+    title = "Going Out with Friends Across Workday Alcohol Levels",
+    x = "Workday Alcohol Level",
+    y = "Going Out Frequency (1=Very Low, 5=Very High)"
+  ) +
+  theme_minimal()
+```
+
+**Free Time After School by Weekend Alcohol:**
+```{r}
+ggplot(por_df, aes(x = Walc, y = freetime)) +
+  geom_boxplot(fill = "steelblue") +
+  labs(
+    title = "Free Time After School Across Weekend Alcohol Levels",
+    x = "Weekend Alcohol Level",
+    y = "Free Time (1=Very Low, 5=Very High)"
+  ) +
+  theme_minimal()
+```
+
+
+
 
