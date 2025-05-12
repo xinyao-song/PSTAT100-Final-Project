@@ -38,7 +38,7 @@ bfcolor <- function(x, color) {
 <div style="text-align: center">
 <span style="color: blue;"> **STUDENT NAME **</span> 
 </div>
-- Xinyao Song   (6194773)
+- Xinyao Song   (xinyaosong)
 - Matthew Chan (hchan837)
 - STUDENT 3    (NetID 3)
 - STUDENT 4    (NetID 4)
@@ -120,7 +120,8 @@ por_df <- por_df %>%
     higher = as.factor(higher),
     internet = as.factor(internet),
     romantic = as.factor(romantic),
-    Dalc = factor(Dalc, levels = 1:5, ordered = TRUE), # ordered factor from 1-5 for very high, low etc.
+    # ordered factor from 1-5 for very high, low etc.
+    Dalc = factor(Dalc, levels = 1:5, ordered = TRUE), 
     Walc = factor(Walc, levels = 1:5, ordered = TRUE)
   )
 
