@@ -18,6 +18,7 @@ format:
     toc: false
     toc-location: left
     number-sections: true
+    
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(message =  FALSE)
@@ -38,10 +39,10 @@ bfcolor <- function(x, color) {
 <div style="text-align: center">
 <span style="color: blue;"> **STUDENT NAME **</span> 
 </div>
-- Xinyao Song   (xinyaosong)
-- Matthew Chan (hchan837)
-- Darren Colianni    (dcolianni)
-- STUDENT 4    (NetID 4)
+- Xinyao Song     (xinyaosong)
+- Matthew Chan    (hchan837)
+- Darren Colianni (dcolianni)
+- Nic Chan        (nicholaschan)
 - STUDENT 5    (NetID 5)
 :::
 
@@ -131,11 +132,12 @@ print(anyNA(por_df))
 From the missing value check above, we can see that there are no missing values in this dataset. Therefore, no data cleaning is necessary.
 
 ## Descriptive Statistics
+Below are the summary statistics for all numeric variables. 
 ```{r}
-summary(por_df)
+por_df %>%
+  select(where(is.numeric)) %>%
+  summary()
 ```
-
-
 
 ## Data Visualization
 
@@ -164,7 +166,7 @@ make_boxplot <- function(por_df, xvar, fill_colors = NULL,  # boxplot gg func
 }
 ```
 
-```{r, warning=FALSE}
+```{r, warning=FALSE, fig.width=10, fig.height=4}
 p1 <- make_boxplot(por_df, "school", c("GP" = "lavender", "MS" = "orange"), xlabel = "School")
 p2 <- make_boxplot(por_df, "schoolsup", c("yes" = "purple", "no" = "tan"), xlabel = "School Support")
 p3 <- make_boxplot(por_df, "Mjob", title = "Mother's Job vs Final Grade", xlabel = "Mother's Job")
@@ -172,12 +174,11 @@ p4 <- make_boxplot(por_df, "Fjob", title = "Father's Job vs Final Grade", xlabel
 p5 <- make_boxplot(por_df, "internet", c("yes" = "forestgreen", "no" = "gray60"), xlabel = "Internet Access")
 p6 <- make_boxplot(por_df, "sex", c("F" = "red", "M" = "steelblue"), xlabel = "Sex")
 
-p1 | p2
-p3 / p4
+(p1 | p2) | (p3 / p4)
+```
+```{r, warning=FALSE, fig.width=4, fig.height=2.5}
 p5 | p6
 ```
-
-
 The GP school has a higher median G3 among the two. School support indicates 
 struggling students--its median is slightly lower than those not receiving support.
 
@@ -189,7 +190,7 @@ Having internet access is significant as well, and so is the student's
 sex: having internet and being female having 95% confidence medians
 above the opposite groups.
 
-```{r}
+```{r,fig.width=10, fig.height=4}
 p_reason <- make_boxplot(por_df, "reason", 
                          title = "Reason for Choosing School vs Final Grade",
                          xlabel = "Reason")
@@ -198,20 +199,20 @@ p_higher <- make_boxplot(por_df, "higher", fill_colors = c("yes" = "green", "no"
   title = "Pursuing Higher Education vs Final Grade",
   xlabel = "Plans for Higher Ed")
 
-p_reason / p_higher
-```
 
-Both of these factors indicate motivation. So, as is evident, they have significantly different medians between each of these two sets of groups.
-
-```{r}
-ggplot(por_df, aes(failures, G3)) +
+p_failures <- ggplot(por_df, aes(failures, G3)) +
   geom_jitter(width = 0.2, height = 0.2, alpha = 0.4, color = "steelblue") +
-  geom_smooth(method = "lm", color = "darkred") +  # se = TRUE is default
-  labs(title = "Past Failures vs Final Grade", x = "Number of Past Failures", y = "G3 (Final Grade)") +
+  geom_smooth(method = "lm", color = "darkred") +
+  labs(title = "Past Failures vs Final Grade", 
+       x = "Number of Past Failures", 
+       y = "G3 (Final Grade)") +
   theme_bw()
-```
 
-This is the strongest predictor that is not based on G2 grade. Its R^2 is
+(p_reason / p_higher) | p_failures
+```
+For the set of graph on the left, both of these factors indicate motivation. So, as is evident, they have significantly different medians between each of these two sets of groups.
+
+For the graph on the right, it is the strongest predictor that is not based on G2 grade. Its R^2 is
 rather weak, but bt tracing a horizontal line from the left to the
 right, finding if the left's shaded bottom is above a point on the right's, one finds:
 - 0 failures has a significantly greater predicted final grade than the rest 
@@ -219,83 +220,82 @@ right, finding if the left's shaded bottom is above a point on the right's, one 
 
 ### Research Question 2: How is alcohol consumption among Portuguese high school students associated with their academic performance and social activities? 
 
-\section*{Grade Distributions by Alcohol Levels} 
+#### Grade Distributions by Alcohol Levels
 
-**Final Grade by Workday Alcohol Category:**
-```{r}
-ggplot(por_df, aes(x = Dalc, y = G3)) +
+**Final Grade by Workday Alcohol Category & Final Grade by Weekend Alcohol Category**
+```{r,fig.width=10, fig.height=3}
+p_dalc <- ggplot(por_df, aes(x = Dalc, y = G3)) +
   geom_boxplot(outlier.alpha = 0.4, fill = "lightcoral") +
   labs(
-    title = "Distribution of Final Grades Across Workday Alcohol Levels",
-    x = "Workday Alcohol Level",
+    title = "Final Grades vs Workday Alcohol Use",
+    x = "Workday Alcohol Level (Dalc)",
     y = "Final Grade (G3)"
   ) +
-  theme_minimal()
-```
+  theme_minimal()+
+  theme(text = element_text(size = 9)) 
 
-**Final Grade by Weekend Alcohol Category:**
-```{r}
-ggplot(por_df, aes(x = Walc, y = G3)) +
+p_walc <- ggplot(por_df, aes(x = Walc, y = G3)) +
   geom_boxplot(outlier.alpha = 0.4, fill = "steelblue") +
   labs(
     title = "Distribution of Final Grades Across Weekend Alcohol Levels",
     x = "Weekend Alcohol Level",
     y = "Final Grade (G3)"
   ) +
-  theme_minimal()
+  theme_minimal()+
+  theme(text = element_text(size = 9)) 
+
+p_dalc | p_walc
 ```
+
 ---
 
-\section*{Social Activities vs Alcohol Consumption} 
+#### Social Activities vs Alcohol Consumption
 
-**Going Out Frequency by Workday Alcohol:**
-```{r}
-ggplot(por_df, aes(x = Dalc, y = goout)) +
+**Going Out Frequency by Workday Alcohol & Free Time After School by Weekend Alcohol**
+```{r,fig.width=10, fig.height=3}
+p_goout <- ggplot(por_df, aes(x = Dalc, y = goout)) +
   geom_boxplot(outlier.alpha = 0.4, fill = "lightcoral") +
   labs(
     title = "Going Out with Friends Across Workday Alcohol Levels",
     x = "Workday Alcohol Level",
     y = "Going Out Frequency (1=Very Low, 5=Very High)"
   ) +
-  theme_minimal()
-```
+  theme_minimal()+
+  theme(text = element_text(size = 9)) 
 
-**Free Time After School by Weekend Alcohol:**
-```{r}
-ggplot(por_df, aes(x = Walc, y = freetime)) +
+p_freetime <- ggplot(por_df, aes(x = Walc, y = freetime)) +
   geom_boxplot(fill = "steelblue") +
   labs(
     title = "Free Time After School Across Weekend Alcohol Levels",
     x = "Weekend Alcohol Level",
     y = "Free Time (1=Very Low, 5=Very High)"
   ) +
-  theme_minimal()
+  theme_minimal()+
+  theme(text = element_text(size = 9)) 
+
+p_goout | p_freetime
 ```
 
 ## Question 3: Does the average free time differ between students who are in a romantic relationship and those who are not? 
-```{r}
+```{r,fig.width=10, fig.height=3}
 #We create a variable to compare the means of people in relationships vs not in relationships
 mean_df <- por_df %>% group_by(romantic) %>% summarize(mean_freetime = mean(freetime))
-mean_df
 
-#We create side by side density histograms based on relationship status to show free time distribution
-ggplot(por_df, aes(x = freetime)) +
+p_hist <- ggplot(por_df, aes(x = freetime)) +
   geom_histogram(aes(y = ..density.., fill = as.factor(romantic)), 
                  alpha = 0.7, binwidth = 1, color = "black") +
   facet_wrap(~ romantic) +
-  labs(title = "Density Plot of Freetime Based on Relationship Status", 
-       x = "Freetime", 
-       y = "Density",
-       fill = "In a Relationship") +
-  theme_minimal()
+  labs(title = "Density Histogram of Freetime by Relationship Status", x = "Freetime", y = "Density", fill = "In a Relationship") +
+  theme_minimal() +
+  theme(text = element_text(size = 9))
 
-#We create density plot with romantic as a factor to overlay the two density plots
-ggplot(por_df, aes(x = freetime, fill = as.factor(romantic))) +
+p_density <- ggplot(por_df, aes(x = freetime, fill = as.factor(romantic))) +
   geom_density(alpha = 0.4, bw = 0.35) +
-  labs(title = "Density Estimate of Freetime (In Relationship vs Not in Relationship)",
-       x = "Freetime",
-       y = "Density",
-       color = "Year")
+  labs(title = "Density Estimate of Freetime (Romantic vs Not)", x = "Freetime",y = "Density", fill = "In a Relationship") +
+  theme_minimal() +
+  theme(text = element_text(size = 9))
+
+p_hist | p_density
 ```
 
 
