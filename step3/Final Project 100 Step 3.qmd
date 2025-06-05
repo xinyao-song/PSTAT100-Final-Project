@@ -1,7 +1,6 @@
 ---
 title: 'Final Project Report'
 subtitle: "PSTAT100: Data Science Concepts and Analysis" 
-
 author:
     affiliations:
       - name: "Spring 2025"
@@ -19,6 +18,9 @@ format:
     toc-location: left
     number-sections: true
     include-in-header: preamble.tex
+editor: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
@@ -32,71 +34,365 @@ bfcolor <- function(x, color) {
 }
 ```
 
-:::callout
-<div style="text-align: center">
-<span style="color: blue;"> **STUDENT NAME** </span> 
-</div>
-- Xinyao Song     (xinyaosong)
-- Matthew Chan    (hchan837)
-- Darren Colianni (dcolianni)
-- Nic Chan        (nicholaschan)
-- STUDENT 5       (NetID 5)
+```{r, include=FALSE}
+library(dplyr)
+library(tidyr)
+library(readr)
+library(ggplot2)
+library(knitr)
+library(kableExtra)  # Nice styling
+library(MASS)  # For AIC/BIC 
+library(car) # For vif
+```
+
+```{r, include = FALSE}
+por_df <- read.csv("../data/student-por.csv", sep = ";")
+head(por_df)
+
+por_df <- por_df %>%
+  mutate(
+    school = as.factor(school),
+    sex = as.factor(sex),
+    address = as.factor(address),
+    famsize = as.factor(famsize),
+    Pstatus = as.factor(Pstatus),
+    Mjob = as.factor(Mjob),
+    Fjob = as.factor(Fjob),
+    reason = as.factor(reason),
+    guardian = as.factor(guardian),
+    schoolsup = as.factor(schoolsup),
+    famsup = as.factor(famsup),
+    paid = as.factor(paid),
+    activities = as.factor(activities),
+    nursery = as.factor(nursery),
+    higher = as.factor(higher),
+    internet = as.factor(internet),
+    romantic = as.factor(romantic),
+    # ordered factor from 1-5 for very high, low etc.
+    Dalc = factor(Dalc, levels = 1:5, ordered = TRUE), 
+    Walc = factor(Walc, levels = 1:5, ordered = TRUE)
+  )
+```
+
+:::: callout
+::: {style="text-align: center"}
+[ **STUDENT NAME** ]{style="color: blue;"}
 :::
 
+-   Xinyao Song (xinyaosong)
+-   Matthew Chan (hchan837)
+-   Darren Colianni (dcolianni)
+-   Nic Chan (nicholaschan)
+-   STUDENT 5 (NetID 5)
+::::
+
 # Abstract
-This project investigates how various social, familial, and behavioral factors are correlated with academic performance and average free times among Portuguese high school students. Using the Student Performance dataset compiled by Cortez and Silva in 2008, we explore three specific research questions: the first two concerning the influence of parental education and alcohol consumption on students’ final Portuguese grades (G3), and the last one focusing on how one's relationship status influence the amount of free time students report. From the result, we can see that [FINISH AT THE END]
 
-# Introduction 
+This project investigates how various social, familial, and behavioral
+factors are correlated with academic performance and average free times
+among Portuguese high school students. Using the Student Performance
+dataset compiled by Cortez and Silva in 2008, we explore three specific
+research questions: the first two concerning the influence of parental
+education and alcohol consumption on students’ final Portuguese grades
+(G3), and the last one focusing on how one's relationship status
+influence the amount of free time students report. From the result, we
+can see that \[FINISH AT THE END\]
 
-This project focuses on how different factors influence school performance in Portuguese secondary school students. The dataset our team used is the Student Performance dataset compiled by Cortez and Silva in 2008. The dataset contains 649 observations and 30 features collected through questionnaires from two Portuguese high schools, with features covering aspects of family background, social environment, academic records, and types of lifestyles. The primary objective of our analysis is to examine how different social and behavioral factors relate to the final Portuguese grade (G3), which is measured on a scale from 0 to 20. By answering the three focused research questions below, we aim to understand how various background and behavioral variables correlate with or predict academic performance. The results from this analysis could help inform educational strategies and potentially help students with their stress and mental health.
+# Introduction
+
+This project focuses on how different factors influence school
+performance in Portuguese secondary school students. The dataset our
+team used is the Student Performance dataset compiled by Cortez and
+Silva in 2008. The dataset contains 649 observations and 30 features
+collected through questionnaires from two Portuguese high schools, with
+features covering aspects of family background, social environment,
+academic records, and types of lifestyles. The primary objective of our
+analysis is to examine how different social and behavioral factors
+relate to the final Portuguese grade (G3), which is measured on a scale
+from 0 to 20. By answering the three focused research questions below,
+we aim to understand how various background and behavioral variables
+correlate with or predict academic performance. The results from this
+analysis could help inform educational strategies and potentially help
+students with their stress and mental health.
 
 ## Research Question 1
-After statistically controlling for weekly study time (on a 1–4 numeric scale where 1 indicates less than 2 hours and 4 indicates more than 10 hours) and internet access (coded as “yes” or “no”), how is the father’s highest education level (on a 0–4 numeric scale where 0 indicates no formal education and 4 indicates higher education) associated with Portuguese high school students’ final grades in Portuguese class (G3), which are measured on a 0–20 numeric scale?
 
-**Hypothesis:** 
+After statistically controlling for weekly study time (on a 1–4 numeric
+scale where 1 indicates less than 2 hours and 4 indicates more than 10
+hours) and internet access (coded as “yes” or “no”), how is the father’s
+highest education level (on a 0–4 numeric scale where 0 indicates no
+formal education and 4 indicates higher education) associated with
+Portuguese high school students’ final grades in Portuguese class (G3),
+which are measured on a 0–20 numeric scale?
 
-$H_0$: After controlling for weekly study time and internet access, the father’s highest education level (0 = no formal education to 4 = higher education) has no significant association with students’ final Portuguese grade (G3, measured on a 0–20 scale).
+**Hypothesis:**
 
-$H_1$: After controlling for weekly study time and internet access, the father’s highest education level (0 = no formal education to 4 = higher education) is significantly positively associated with students’ final Portuguese grade (G3, 0–20 scale).
+$H_0$: After controlling for weekly study time and internet access, the
+father’s highest education level (0 = no formal education to 4 = higher
+education) has no significant association with students’ final
+Portuguese grade (G3, measured on a 0–20 scale).
+
+$H_1$: After controlling for weekly study time and internet access, the
+father’s highest education level (0 = no formal education to 4 = higher
+education) is significantly positively associated with students’ final
+Portuguese grade (G3, 0–20 scale).
 
 ## Research Question 2
-Based on the number of alcoholic beverages consumed by Portuguese high school students per weekday and weekend (on a 1-5 numeric scale where 1 indicates very low and 5 indicating very high), how does it affect Portuguese high school students’ final grades in Portuguese class (G3), which are measured on a 0–20 numeric scale?
 
-**Hypothesis:** 
+Based on the number of alcoholic beverages consumed by Portuguese high
+school students per weekday and weekend (on a 1-5 numeric scale where 1
+indicates very low and 5 indicating very high), how does it affect
+Portuguese high school students’ final grades in Portuguese class (G3),
+which are measured on a 0–20 numeric scale?
 
-$H_0$: There is no significant association between students’ alcohol consumption levels during weekdays and weekends (1 = very low to 5 = very high) and their final Portuguese grade (G3, 0–20 scale).
+**Hypothesis:**
 
-$H_1$: Students’ alcohol consumption levels during weekdays and weekends (1 = very low to 5 = very high) are significantly associated with their final Portuguese grade (G3, 0–20 scale).
+$H_0$: There is no significant association between students’ alcohol
+consumption levels during weekdays and weekends (1 = very low to 5 =
+very high) and their final Portuguese grade (G3, 0–20 scale).
+
+$H_1$: Students’ alcohol consumption levels during weekdays and weekends
+(1 = very low to 5 = very high) are significantly associated with their
+final Portuguese grade (G3, 0–20 scale).
 
 ## Research Question 3
-Is there a statistically significant difference in reported average free time (on a 1-5 categorical scale where 1 indicates very low and 5 indicates very high) between Portuguese high school students who are in romantic relationships (coded as 1), and those who are not in romantic relationships (coded as 0)?
 
-**Hypothesis:** 
+Is there a statistically significant difference in reported average free
+time (on a 1-5 categorical scale where 1 indicates very low and 5
+indicates very high) between Portuguese high school students who are in
+romantic relationships (coded as 1), and those who are not in romantic
+relationships (coded as 0)?
 
-$H_0$: There is no significant difference in average free time between students in a romantic relationship and those who are not.
+**Hypothesis:**
 
-$H_1$: There is a significant difference in average free time (1 = very low to 5 = very high) between students in a romantic relationship and students who are not in romantic relationships.
+$H_0$: There is no significant difference in average free time between
+students in a romantic relationship and those who are not.
 
-# Data Processing 
-The Student Performance dataset does not contain any missing values or fields with unclear meanings. Therefore, no data cleaning or preprocessing was necessary for this project. 
+$H_1$: There is a significant difference in average free time (1 = very
+low to 5 = very high) between students in a romantic relationship and
+students who are not in romantic relationships.
+
+# Data Processing
+
+The Student Performance dataset does not contain any missing values or
+fields with unclear meanings. Therefore, no data cleaning or
+preprocessing was necessary for this project.
 
 # Research Question 1
 
-## Modeling Process 
+"Controlling for studytime, internet access: lm. (on a 1–4 numeric scale
+where 1 indicates less than 2 hours and 4 indicates more than 10 hours)
+and internet access (coded as “yes” or “no”), how is the father’s
+highest education level (on a 0–4 numeric scale where 0 indicates no
+formal education and 4 indicates higher education) associated with
+Portuguese high school students’ final grades in Portuguese class (G3),
+which are measured on a 0–20 numeric scale?"
+
+## Modeling Process
+
+The response variable is G3: the student's final grade in Portuguese.
+The question at hand calls for a partial significance test, which works
+by having one one the models be a subset to another. Therefore, if there
+is a significant difference, it is due to the predictors added in
+between. \
+\
+The models were both linear and used the following predictors:
+
+-   Model 1: Study time and internet access.
+
+-   Model 2: Model 1's predictors as well as the education level of the
+    student's father.
+
+The two linear models were compared using an ANOVA test. Since the only
+predictor added in model 2 was the father's education, if there was a
+significant decrease in residual variance--as indicated by the resulting
+p-value--it would be due to this predictor.
+
 ## Results
-## Interpretation 
+
+```{r, echo = FALSE}
+anova_kable <- function(model1, model2) {
+  aov_out <- anova(model1, model2)
+
+  Model <- rownames(aov_out)
+  Res.Df <- aov_out[, "Res.Df"]
+  RSS <- signif(aov_out[, "RSS"], 5)
+  Df <- ifelse(is.na(aov_out[, "Df"]), "", aov_out[, "Df"])
+  Sum_of_Sq <- ifelse(is.na(aov_out[, "Sum of Sq"]), "", signif(aov_out[, "Sum of Sq"], 5))
+  F <- ifelse(is.na(aov_out[, "F"]), "", signif(aov_out[, "F"], 4))
+
+  # Extract p-values as numeric, then format with signif( ,2)
+  pvals_raw <- aov_out$`Pr(>F)`
+  pvals_signif <- ifelse(
+    is.na(pvals_raw),
+    "",
+    formatC(signif(pvals_raw, 2), format = "e", digits = 2)
+  )
+
+  Signif <- cut(as.numeric(pvals_raw),
+                breaks = c(-Inf, 0.001, 0.01, 0.05, 0.1, Inf),
+                labels = c("***", "**", "*", ".", ""),
+                right = TRUE)
+  Signif[is.na(Signif)] <- ""
+
+  df <- data.frame(
+    Model = Model,
+    Res.Df = Res.Df,
+    RSS = RSS,
+    Df = Df,
+    `Sum of Sq` = Sum_of_Sq,
+    F = F,
+    `Pr(>F)` = pvals_signif,
+    Signif = Signif,
+    stringsAsFactors = FALSE
+  )
+
+  knitr::kable(df, format = "html", align = "c",
+               caption = "ANOVA Comparison Table") %>%
+    kableExtra::kable_styling(full_width = FALSE, position = "left")
+}
+
+lm_table <- function(model, digits = 2, pval_sci_threshold = 0.01, caption = "Linear Model Summary") {
+  df <- broom::tidy(model) %>%
+    dplyr::select(term, estimate, std.error, statistic, p.value) %>%
+    dplyr::rename(
+      Term = term,
+      Estimate = estimate,
+      `Std. Error` = std.error,
+      `t value` = statistic,
+      `Pr(>|t|)` = p.value
+    )
+
+  # Format values
+  df$Estimate <- signif(df$Estimate, digits)
+  df$`Std. Error` <- signif(df$`Std. Error`, digits)
+  df$`t value` <- signif(df$`t value`, digits)
+
+  # Format p-values with smart thresholding
+  df$`Pr(>|t|)` <- ifelse(
+    is.na(df$`Pr(>|t|)`),
+    "",
+    ifelse(
+      df$`Pr(>|t|)` < pval_sci_threshold,
+      formatC(signif(df$`Pr(>|t|)`, digits), format = "e", digits = digits),
+      formatC(round(df$`Pr(>|t|)`, digits), format = "f", digits = digits)
+    )
+  )
+
+  # Add significance stars
+  pval_raw <- broom::tidy(model)$p.value
+  df$Signif <- cut(pval_raw,
+                   breaks = c(-Inf, 0.001, 0.01, 0.05, 0.1, Inf),
+                   labels = c("***", "**", "*", ".", ""),
+                   right = TRUE)
+  df$Signif[is.na(df$Signif)] <- ""
+
+  # Return styled kable
+  knitr::kable(df, format = "html", align = "c", caption = caption) %>%
+    kableExtra::kable_styling(full_width = FALSE, position = "left")
+}
+```
+
+Here were the results:
+
+```{r, echo=FALSE}
+f1 <- G3 ~ studytime + internet
+f2 <- G3 ~ studytime + internet + Fedu
+
+model1 <- lm(data=por_df, formula = f1)
+model2 <- lm(data=por_df, formula = f2)
+
+anova_parsig <- anova(model1, model2)
+anova_parsig$`Pr(>F)`[2]
+
+anova_kable(model1, model2)
+```
+
+## Interpretation
+
+With a p-value of approximately 2.30 \* $10^{-6}$, there is sufficient
+evidence to reject the null hypothesis,\
+$H_0$: that after controlling for weekly study time and internet access,
+the father’s highest education level has no significant association with
+students’ final Portuguese grade. \
+\
+Therefore, opting instead for the alternative hypothesis, the father's
+highest education level does play\
+a role in the students' final Portuguese grade.
+
+## Visualization and Communication (Confirmation: BIC Linear Model Selection)
+
+To better assess the utility of father's education in general, alongside
+other factors beside previous grade, it would be ideal to select a more
+general linear model. To this end, using a BIC-criterion linear model,
+excluding G1 and G2 grades, the following model was selected:
+
+```{r, echo=FALSE}
+nopregrade_model <- lm(data = por_df, formula = G3 ~. - G2 - G1)
+
+best_model_bic <- stepAIC(nopregrade_model, direction="backward", k=log(n))
+bic_summary <- summary(best_model_bic)
+bic_adjr <- signif(bic_summary$adj.r.squared, 4)
+
+# vif(best_model_bic)
+lm_table(best_model_bic)
+```
+
+It yielded an $R^2$ adjusted value of **`r bic_adjr`**, which is low,
+but considering prior grades were not included, is actually quite solid.
+Since this was under the BIC criterion, which is strict in its selection
+(penalizes more than AIC model selection), this indicates that father's
+education earns its spot in general, even in the presence of the
+remaining predictors.
+
+## Conclusion and Recommendation
+
+To explore which factors influence student performance independently of
+past academic achievement, we fitted a linear model excluding prior
+grades (G1 and G2). While this naturally reduced overall predictive
+accuracy, the analysis revealed meaningful trends. This BIC-selected
+model—known for its strict penalty on model complexity—achieved an
+adjusted $R^2$ of **`r bic_adjr`**. As expected, this result was lower
+than models including prior grades. Nevertheless, it brings the focus to
+otherwise-overlooked non-academic predictors.
+
+Notably, father’s education was retained even under BIC’s conservative
+selection criteria. While it may not have had the largest effect size,
+its inclusion suggests a consistent, non-negligible influence on student
+outcomes, when disregarding past performance.
+
+This finding has practical implications. One likely reason for this
+effect is the support an educated parent can offer outside the
+classroom—particularly with homework or academic guidance. To replicate
+this advantage within the school environment, we recommend improved
+tutoring/afterschool programs, which would level playing field for
+students without similar at-home support.\
+\
+Additionally, the model revealed that students receiving school support
+(“schoolsupyes”) had, on average, a 1.4-point lower final grade compared
+to those who did not. This result, to some degree, likely reflects
+selection effects: students receiving support are those already
+struggling. Yet, in an ideal scenario, support recipients would perform
+at least on par with their peers, and perhaps even surpass them.
+
+Given that a 1.4-point drop is meaningful in a 20-point grading system,
+this result signals room for improvement in how academic support is
+delivered/targeted.
 
 # Research Question 2
 
-## Modeling Process 
+## Modeling Process
+
 ## Results
-## Interpretation 
+
+## Interpretation
 
 # Research Question 3
 
-## Modeling Process 
+## Modeling Process
+
 ## Results
-## Interpretation 
+
+## Interpretation
 
 # Conclusion
-
