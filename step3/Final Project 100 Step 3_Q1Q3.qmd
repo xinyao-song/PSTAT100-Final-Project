@@ -1,0 +1,484 @@
+---
+title: 'Final Project Report'
+subtitle: "PSTAT100: Data Science Concepts and Analysis" 
+author:
+    affiliations:
+      - name: "Spring 2025"
+affiliation-title: "Quarter"
+format: 
+  pdf: 
+    latex_engine: xelatex
+    geometry: "letterpaper, margin=0.3in"
+    code-fold: true
+    code-line-numbers: true
+    code-copy: true
+    code-tools: true
+    self-contained: true
+    toc: false
+    toc-location: left
+    number-sections: true
+    ##include-in-header: preamble.tex
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message =  FALSE, warning = FALSE, error = FALSE)
+bfcolor <- function(x, color) {
+  if (knitr::is_latex_output()) {
+    sprintf("\\textcolor{%s}{\\textbf{%s}}", color, x)
+  } else if (knitr::is_html_output()) {
+    sprintf("<span style='color: %s;'><b>%s</b></span>", color, x)
+  } else x
+}
+```
+
+```{r, include=FALSE}
+library(dplyr)
+library(tidyr)
+library(readr)
+library(ggplot2)
+library(knitr)
+library(MASS)  # For AIC/BIC 
+library(car) # For vif
+```
+
+```{r, include = FALSE}
+por_df <- read_csv(".../data/student-por.csv")
+head(por_df)
+
+por_df <- por_df %>%
+  mutate(
+    school = as.factor(school),
+    sex = as.factor(sex),
+    address = as.factor(address),
+    famsize = as.factor(famsize),
+    Pstatus = as.factor(Pstatus),
+    Mjob = as.factor(Mjob),
+    Fjob = as.factor(Fjob),
+    reason = as.factor(reason),
+    guardian = as.factor(guardian),
+    schoolsup = as.factor(schoolsup),
+    famsup = as.factor(famsup),
+    paid = as.factor(paid),
+    activities = as.factor(activities),
+    nursery = as.factor(nursery),
+    higher = as.factor(higher),
+    internet = as.factor(internet),
+    romantic = as.factor(romantic),
+    # ordered factor from 1-5 for very high, low etc.
+    Dalc = factor(Dalc, levels = 1:5, ordered = TRUE), 
+    Walc = factor(Walc, levels = 1:5, ordered = TRUE)
+  )
+```
+
+:::: callout
+::: {style="text-align: center"}
+[**STUDENT NAME**]{style="color: blue;"}
+:::
+
+-   Xinyao Song (xinyaosong)
+-   Matthew Chan (hchan837)
+-   Darren Colianni (dcolianni)
+-   Nic Chan (nicholaschan)
+-   STUDENT 5 (NetID 5)
+::::
+
+# Abstract
+
+This project investigates how various social, familial, and behavioral
+factors are correlated with academic performance and average free times
+among Portuguese high school students. Using the Student Performance
+dataset compiled by Cortez and Silva in 2008, we explore three specific
+research questions: the first two concerning the influence of parental
+education and alcohol consumption on students’ final Portuguese grades
+(G3), and the last one focusing on how one's relationship status
+influence the amount of free time students report. From the result, we
+can see that \[FINISH AT THE END\]
+
+# Introduction
+
+This project focuses on how different factors influence school
+performance in Portuguese secondary school students. The dataset our
+team used is the Student Performance dataset compiled by Cortez and
+Silva in 2008. The dataset contains 649 observations and 30 features
+collected through questionnaires from two Portuguese high schools, with
+features covering aspects of family background, social environment,
+academic records, and types of lifestyles. The primary objective of our
+analysis is to examine how different social and behavioral factors
+relate to the final Portuguese grade (G3), which is measured on a scale
+from 0 to 20. By answering the three focused research questions below,
+we aim to understand how various background and behavioral variables
+correlate with or predict academic performance. The results from this
+analysis could help inform educational strategies and potentially help
+students with their stress and mental health.
+
+## Research Question 1
+
+After statistically controlling for weekly study time (on a 1–4 numeric
+scale where 1 indicates less than 2 hours and 4 indicates more than 10
+hours) and internet access (coded as “yes” or “no”), how is the father’s
+highest education level (on a 0–4 numeric scale where 0 indicates no
+formal education and 4 indicates higher education) associated with
+Portuguese high school students’ final grades in Portuguese class (G3),
+which are measured on a 0–20 numeric scale?
+
+**Hypothesis:**
+
+$H_0$: After controlling for weekly study time and internet access, the
+father’s highest education level (0 = no formal education to 4 = higher
+education) has no significant association with students’ final
+Portuguese grade (G3, measured on a 0–20 scale).
+
+$H_1$: After controlling for weekly study time and internet access, the
+father’s highest education level (0 = no formal education to 4 = higher
+education) is significantly positively associated with students’ final
+Portuguese grade (G3, 0–20 scale).
+
+## Research Question 2
+
+Based on the number of alcoholic beverages consumed by Portuguese high
+school students per weekday and weekend (on a 1-5 numeric scale where 1
+indicates very low and 5 indicating very high), how does it affect
+Portuguese high school students’ final grades in Portuguese class (G3),
+which are measured on a 0–20 numeric scale?
+
+**Hypothesis:**
+
+$H_0$: There is no significant association between students’ alcohol
+consumption levels during weekdays and weekends (1 = very low to 5 =
+very high) and their final Portuguese grade (G3, 0–20 scale).
+
+$H_1$: Students’ alcohol consumption levels during weekdays and weekends
+(1 = very low to 5 = very high) are significantly associated with their
+final Portuguese grade (G3, 0–20 scale).
+
+## Research Question 3
+
+Is there a statistically significant difference in reported average free
+time (on a 1-5 categorical scale where 1 indicates very low and 5
+indicates very high) between Portuguese high school students who are in
+romantic relationships (coded as 1), and those who are not in romantic
+relationships (coded as 0)?
+
+**Hypothesis:**
+
+$H_0$: There is no significant difference in average free time between
+students in a romantic relationship and those who are not.
+
+$H_1$: There is a significant difference in average free time (1 = very
+low to 5 = very high) between students in a romantic relationship and
+students who are not in romantic relationships.
+
+# Data Processing
+
+The Student Performance dataset does not contain any missing values or
+fields with unclear meanings. Therefore, no data cleaning or
+preprocessing was necessary for this project.
+
+# Research Question 1
+
+## Modeling Process
+
+The aim is to observe if, after controlling for study time and internet
+access, father's education significantly influenced the student's final
+Portuguese grade. The question at hand calls for a partial significance
+test, which works by having one one the models be a subset to another.
+Therefore, if there is a significant difference, it is due to the
+predictors added in between.\
+\
+The models were both linear and used the following predictors:
+
+-   Model 1: Study time and internet access.
+
+-   Model 2: Model 1's predictors as well as the education level of the
+    student's father.
+
+The two linear models were compared using an ANOVA test. Since the only
+predictor added in model 2 was the father's education, if there was a
+significant decrease in residual variance--as indicated by the resulting
+p-value--it would be due to this predictor.
+
+## Results
+
+```{r, echo = FALSE}
+anova_kable <- function(model1, model2) {
+  aov_out <- anova(model1, model2)
+
+  Model <- rownames(aov_out)
+  Res.Df <- aov_out[, "Res.Df"]
+  RSS <- signif(aov_out[, "RSS"], 5)
+  Df <- ifelse(is.na(aov_out[, "Df"]), "", aov_out[, "Df"])
+  Sum_of_Sq <- ifelse(is.na(aov_out[, "Sum of Sq"]), "", signif(aov_out[, "Sum of Sq"], 5))
+  F <- ifelse(is.na(aov_out[, "F"]), "", signif(aov_out[, "F"], 4))
+
+  # Extract p-values as numeric, then format with signif( ,2)
+  pvals_raw <- aov_out$`Pr(>F)`
+  pvals_signif <- ifelse(
+    is.na(pvals_raw),
+    "",
+    formatC(signif(pvals_raw, 2), format = "e", digits = 2)
+  )
+
+  Signif <- cut(as.numeric(pvals_raw),
+                breaks = c(-Inf, 0.001, 0.01, 0.05, 0.1, Inf),
+                labels = c("***", "**", "*", ".", ""),
+                right = TRUE)
+  Signif[is.na(Signif)] <- ""
+
+  df <- data.frame(
+    Model = Model,
+    Res.Df = Res.Df,
+    RSS = RSS,
+    Df = Df,
+    `Sum of Sq` = Sum_of_Sq,
+    F = F,
+    `Pr(>F)` = pvals_signif,
+    Signif = Signif,
+    stringsAsFactors = FALSE
+  )
+
+  knitr::kable(df, align = "c",
+               caption = "ANOVA Comparison Table")
+}
+
+lm_table <- function(model, digits = 2, pval_sci_threshold = 0.01, caption = "Linear Model Summary") {
+  df <- broom::tidy(model) %>%
+    dplyr::select(term, estimate, std.error, statistic, p.value) %>%
+    dplyr::rename(
+      Term = term,
+      Estimate = estimate,
+      `Std. Error` = std.error,
+      `t value` = statistic,
+      `Pr(>|t|)` = p.value
+    )
+
+  # Format values
+  df$Estimate <- signif(df$Estimate, digits)
+  df$`Std. Error` <- signif(df$`Std. Error`, digits)
+  df$`t value` <- signif(df$`t value`, digits)
+
+  # Format p-values with smart thresholding
+  df$`Pr(>|t|)` <- ifelse(
+    is.na(df$`Pr(>|t|)`),
+    "",
+    ifelse(
+      df$`Pr(>|t|)` < pval_sci_threshold,
+      formatC(signif(df$`Pr(>|t|)`, digits), format = "e", digits = digits),
+      formatC(round(df$`Pr(>|t|)`, digits), format = "f", digits = digits)
+    )
+  )
+
+  # Add significance stars
+  pval_raw <- broom::tidy(model)$p.value
+  df$Signif <- cut(pval_raw,
+                   breaks = c(-Inf, 0.001, 0.01, 0.05, 0.1, Inf),
+                   labels = c("***", "**", "*", ".", ""),
+                   right = TRUE)
+  df$Signif[is.na(df$Signif)] <- ""
+
+  # Return styled kable
+  knitr::kable(df, align = "c", caption = caption)
+}
+```
+
+Here were the results:
+
+```{r, echo=FALSE}
+f1 <- G3 ~ studytime + internet
+f2 <- G3 ~ studytime + internet + Fedu
+
+model1 <- lm(data=por_df, formula = f1)
+model2 <- lm(data=por_df, formula = f2)
+anova_parsig <- anova(model1, model2)
+
+anova_kable(model1, model2)
+```
+
+## Interpretation
+
+With a p-value of approximately 2.30 \* $10^{-6}$, there is sufficient
+evidence to reject the null hypothesis,\
+$H_0$: that after controlling for weekly study time and internet access,
+the father’s highest education level has no significant association with
+students’ final Portuguese grade. Therefore, opting instead for the
+alternative hypothesis, the father's highest education level does play a
+role in the students' final Portuguese grade.
+
+## Visualization and Communication (Model Checking)
+
+Model checking was performed to ensure this result from the previous
+section was accurate. To assess whether this model is appropriate, we
+examined Model 2, which contains the same predictors as Model 1 in
+addition to father's education. For the partial significance test to be
+valid, Model 2 must satisfy the standard linear regression assumptions:
+independence, no structure in residuals, normality of residuals, and
+homoscedasticity (equal variance across fitted values).
+
+Independence is satisfied because the dataset includes the full
+population of students from each school during that year. Additionally,
+because this is an observational study with no temporal or treatment
+structure, residual independence is expected and visually confirmed. It
+only remains to be seen whether the remaining conditions—normality and
+equal variance—hold true.
+
+```{r Functions, echo=FALSE}
+shapiro_pval <- function(resids, digits=3){
+  shap <- shapiro.test(resids)
+  signif(shap$p.value, digits)
+}
+
+qqplott <- function(residuals){
+  ggplot(data.frame(residuals), aes(sample = residuals)) +
+    stat_qq() +
+    stat_qq_line() +
+    labs(title = "Q-Q Plot of Residuals", x = "Theoretical Quantiles", y = "Sample Quantiles") +
+    theme_minimal()
+}
+
+hist_resids <- function(resids, bins = 30) {
+  df <- data.frame(residuals = resids)
+  ggplot(df, aes(x = residuals)) +
+    geom_histogram(bins = bins, fill = "steelblue", color = "black", alpha = 0.7) +
+    labs(title = "Student Grade Residuals", x = "Residuals", y = "Count") +
+    theme_minimal()
+}
+
+
+residplot_fitval <- function(model) {
+  df <- data.frame(Fitted = fitted(model), Residuals = residuals(model))
+  ggplot(df, aes(x = Fitted, y = Residuals)) +
+    geom_point() +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "blue") +
+    labs(title = "Residuals vs. Fitted Values", x = "Fitted Values", y = "Residuals") +
+    theme_minimal()
+}
+```
+
+```{r, echo=FALSE}
+resids <- model2$residuals
+```
+
+### Normality of Residuals
+
+```{r Normality Charts, echo=FALSE}
+hist_resids(resids)
+qqplott(resids)
+```
+
+```{r Calculations, echo=FALSE}
+shap_test <- shapiro.test(resids)
+shap_pval <- signif(shap_test$p.value, 3)
+off_values_percent <- round(100 * (sum(resids < -7)/nrow(por_df)), 2)
+```
+
+The Q-Q plot indicates a deviation from normality in the residuals, and
+likewise, a Shapiro-wilk test result of `r shap_pval`(p-value \< 0.05)
+corroborates this deviation. Nevertheless, as evident through the
+histogram, the deviation is primarily due to a relatively small group of
+students who scored significantly lower than predicted, causing a mild
+left skew. These values represent approximately `r off_values_percent`%
+of the residuals. Aside from this small subset, the residuals are
+normally distributed and centered around zero. \
+\
+Given the large sample size and that the deviation stems from a small
+portion of the data, the normality assumption is considered reasonably
+satisfied for inference purposes.
+
+### Equal Variances Across Fitted Values
+
+```{r Residplotchart, echo=FALSE}
+residplot_fitval(model2)
+```
+
+The residuals appear to have approximately constant variance across the
+range of fitted values, with no clear funneling or systematic spread.
+Thus, there is no strong evidence to reject the homoscedasticity
+assumption.
+
+Hence, all assumptions for the partial significance test performed were
+reasonably satisfied. Therefore, the previously found p-value of
+approximately 2.30 \* $10^{-6}$ can be trusted.
+
+## Conclusion and Recommendation
+
+After controlling for study time and internet access, the father’s
+education level remains a significant positive predictor of students’
+final Portuguese grades. This likely reflects the academic support that
+more educated parents are able to provide at home; eg, helping with
+homework and explaining difficult topics. To support those lacking this
+advantage, schools should consider expanding tutoring and afterschool
+programs to foster a more equitable learning environment. Additionally,
+making greater use of school libraries—through activities like book
+clubs or guest author visits—could help motivate students to read more
+and strengthen their Portuguese language skills.
+
+# Research Question 2
+
+## Modeling Process
+
+## Results
+
+## Interpretation
+
+# Research Question 3
+
+## Modeling Process
+
+When looking at Research Question 3, it was evident that I would be comparing the average amount of free time between two groups. Those groups being students in relationships versus students who are not in relationships. The first thing I did was create side by side density histograms showing the distributions of average free time between the two groups. I made sure it was a density histogram because there were more students not in relationships (412) than those in relationships (239). This ensured that the distributions could be compared 1 to 1 without being affected by unequal weighting. The next plot I created was an overlayed density plot of both distributions which allows the viewer to see the similarities and differences in distribution in both plots. I created these plots to get some preliminary insights on how the distributions looked before I used a t-test to see whether I could reject or fail to reject the null hypothesis that there is no significant difference in average free time between students in a romantic relationship and those who are not.
+
+```{r}
+#| echo: false
+
+ggplot(por_df, aes(x = freetime)) +
+  geom_histogram(aes(y = ..density.., fill = as.factor(romantic)), 
+                 alpha = 0.7, binwidth = 1, color = "black") +
+  facet_wrap(~ romantic) +
+  labs(title = "Density Plot of Freetime Based on Relationship Status", 
+       x = "Freetime", 
+       y = "Density",
+       fill = "In a Relationship") +
+  theme_minimal()
+
+ggplot(por_df, aes(x = freetime, fill = as.factor(romantic))) +
+  geom_density(alpha = 0.4, bw = 0.35) +
+  labs(title = "Density Estimate of Freetime (In Relationship vs Not in Relationship)",
+       x = "Freetime",
+       y = "Density",
+       color = "Year")
+```
+
+## Results
+
+```{r}
+#| echo: false
+var_df <- por_df %>%
+  group_by(romantic) %>%
+  summarize(var_freetime = var(freetime, na.rm = TRUE))
+
+t_test <- t.test(freetime ~ romantic, data = por_df, var.equal = FALSE)  # Welch’s t-test
+
+summary_table <- data.frame(
+  Statistic = c("Mean (No)", "Mean (Yes)", "Variance (No)", "Variance (Yes)", "t-statistic", "df", "p-value", "95% CI Lower", "95% CI Upper"),
+  Value = c(
+    t_test$estimate[1],
+    t_test$estimate[2],
+    var_df$var_freetime[var_df$romantic == "no"],
+    var_df$var_freetime[var_df$romantic == "yes"],
+    t_test$statistic,
+    t_test$parameter,
+    t_test$p.value,
+    t_test$conf.int[1],
+    t_test$conf.int[2]
+  )
+)
+kable(summary_table, digits = 3, caption = "Summary of Welch's t-test for Freetime by Romantic Status")
+```
+We use a Welch's two-sided t-test because the inputted data is independent, the sample sizes between the groups differ, and the variances are unequal. Based on the t-test, we get a t statistic of -0.67501, and a p value of 0.5. Because this is a two tailed test with a = 0.05, our alpha endpoints are approximately -1.96 and 1.96. The t statistic of -0.67501 falls between this interval, so we fail to reject the null hypothesis.
+
+## Interpretation 
+
+Based on the two-sided Welch's t-test, we fail to reject the null hypothesis. This indicates that there is no significant difference in average free time between students in relationships and students not in relationships. This finding agrees with the density histograms and density plot because when looking at the models, the two groups appear to follow similar distributions. Running the t-test confirms the observation that there is no statistically significant difference in average free time.
+
+# Conclusion
